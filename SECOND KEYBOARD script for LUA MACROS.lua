@@ -6,7 +6,7 @@
 clear()
 
 -- 'Set this to 0000AAA for your first run
-local keyboardIdentifier = 'AADF04D'
+local keyboardIdentifier = '27F43FA8'
 
 
 --You can use this section to list all the connected keyboards.
@@ -15,10 +15,12 @@ local keyboardIdentifier = 'AADF04D'
 --Once you have this identifier, replace the value of keyboardIdentifier above with it
 
 --Don't ask for keyboard assignment help if the user has manually entered a keyboard identifier
-if keyboardIdentifier == '0000AAA' then
+lmc_device_set_name('MACROS', keyboardIdentifier);
+
+
 lmc_assign_keyboard('MACROS');
-else lmc_device_set_name('MACROS', keyboardIdentifier);
-end
+
+
 dev = lmc_get_devices()
 for key,value in pairs(dev) do
   print(key..':')
@@ -171,12 +173,16 @@ lmc_set_handler('MACROS', function(button, direction)
                 print(' ')
                 print('Your key ID number is:   ' .. button)
 				print('It was assigned string:    ' .. config[button])
-                                if config[button] == "numMult" then
+                                if config[button] == "numMult" or config[button] == "enter" then
+                                   -- use this section for keys which will trigger scripts which aren't instantaneous
+                                   --(for example, ones which monitor volume)
                                    PlayscriptAHK(config[button])
                                 else
+                                    --all other keys go here because they run instantaneous scripts, which we may want to trigger while another script runs.
                                    sendToAHK(config[button])
                                 end
 	else
+                -- if a key hasn't been assigned a value then output as follows
                 print(' ')
                 print('Not yet assigned: ' .. button)
 	end

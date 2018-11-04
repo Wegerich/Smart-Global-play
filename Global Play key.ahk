@@ -13,6 +13,23 @@ Menu, Tray, Icon, shell32.dll, 138 ; this changes the tray icon to a little play
 FileRead, key, %A_WorkingDir%\keypressed.txt
 If (key = "sample_keyname")
 Send {Volume_Down}
+else if(key = "enter")
+{
+	SoundGet, OriginalVolSndGet
+	;msgbox, %OriginalVolSndGet% ;allows you to check when debugging
+	SoundSet, OriginalVolSndGet / 2
+	Sleep 600
+	SoundSet, OriginalVolSndGet / 3
+	Sleep 600
+	SoundSet, OriginalVolSndGet / 4
+	Sleep 20000
+	SoundSet, OriginalVolSndGet / 2
+	Sleep 600
+	SoundSet, OriginalVolSndGet / 1.5
+	Sleep 600
+	SoundSet, OriginalVolSndGet 
+}
+
 else if(key = "numMult")
 {
 WinGet, WorkingWin ,, A ;Get current window ID

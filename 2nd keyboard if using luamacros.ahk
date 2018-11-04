@@ -28,9 +28,9 @@ Menu, Tray, Icon, shell32.dll, 283 ; this changes the tray icon to a little keyb
 ~F24::
 FileRead, key, %A_WorkingDir%\keypressed.txt
 If (key = "numMinus")
-Send {Volume_Down}
+Send {Volume_Down}{Volume_Down}
 else if(key = "numPlus")
-Send {Volume_Up}
+Send {Volume_Up}{Volume_Up}
 else if(key = "num0") ;just mirroring the normal numpad - IDK how else to do this.
 Send {Numpad0}
 else if(key = "num1")
@@ -54,13 +54,14 @@ Send {Numpad8}
 else if(key = "backspace")
 Send {Volume_Mute}
 else if(key = "numDiv")
-{
-	WinGet, winid ,, A
-	WinActivate, VirtualDJ, 
-	Send, {m}
-	WinActivate ahk_id %winid%
-	Return
-}
+	{
+		WinGet, winid ,, A
+		WinActivate, VirtualDJ, 
+		Send, {m}
+		WinActivate ahk_id %winid%
+		Return
+	}
+
 ;else if(key = "pagedown") ;used for photo cropping in irfan.
 ;		{
 ;		send ^{y}

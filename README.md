@@ -1,5 +1,15 @@
 # Smart Global play
 
+Key features
+
+-- Run a second keyboard as a media controller keyboard
+-- After pausing, check for user activity and prompt user to restart music (only if no audio is playing)
+	-- Give option to stay silent, of course
+-- Dip volume button (numpad enter) to drop volume for 20 seconds
+
+
+Pre-requisites
+-- The smartest of the audio functions require the Vista Audio Meter for AutoHotKey https://autohotkey.com/board/topic/21984-vista-audio-control-functions/
 
 When you start for the first time you will need to do the following in LuaMacros
 -- start the luamacros script
@@ -16,7 +26,7 @@ It also creates a number of fixes and improvements
 
  - Detects downstrokes of keys instead of upstrokes for faster responses and press-and-hold functionality
  - Allows permanent setting of keyboard ID between restarts
- -No need to manually set the location of keypressed.txt in the AHK script
+ - No need to manually set the location of keypressed.txt in the AHK script
  
  Notable changes
  - The smart play key detects whether sound is playing and prompts the user to restart play from the last media player.
