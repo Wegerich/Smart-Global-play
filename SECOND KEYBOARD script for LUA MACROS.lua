@@ -6,7 +6,7 @@
 clear()
 
 -- 'Set this to 0000AAA for your first run
-local keyboardIdentifier = '27F43FA8'
+local keyboardIdentifier = '102490C9'
 
 
 --You can use this section to list all the connected keyboards.

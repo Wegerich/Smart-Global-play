@@ -9,6 +9,14 @@ Menu, Tray, Icon, shell32.dll, 138 ; this changes the tray icon to a little play
 
 #IfWinActive
 
+;Media play key functions.
+$Media_Play_Pause::
+{
+filedelete, %A_WorkingDir%\keypressed.txt
+fileappend, numMult, %A_WorkingDir%\keypressed.txt
+;Don't return here - want to trigger next set of code as if F23 was pressed.
+}
+
 ~F23::
 FileRead, key, %A_WorkingDir%\keypressed.txt
 If (key = "sample_keyname")
@@ -29,7 +37,6 @@ else if(key = "enter")
 	Sleep 600
 	SoundSet, OriginalVolSndGet 
 }
-
 else if(key = "numMult")
 {
 WinGet, WorkingWin ,, A ;Get current window ID
@@ -128,7 +135,7 @@ IfWinExist, VirtualDJ,
 	
 	
 	Tooltip Second check %peakValue%
-	Sleep 1000
+	Sleep 800
 	Tooltip
 	if (peakvalue > 0.001 and SleptTime < 180000)
 	{
@@ -251,7 +258,7 @@ Finishmeasurement:
 if (Currentvolume > 0.001)
 		{
 			Tooltip Sound playing at %Currentvolume%. Relooping.
-			Sleep 1000
+			Sleep 800
 			Tooltip
 			SleptTime = 0
 			GoTo Restartplay		
@@ -320,14 +327,15 @@ if (Currentvolume > 0.001)
 	{
 		WinActivate ahk_id %MusicWin%
 		Tooltip other media player
-		sleep 1000
+		sleep 200
 		Send,{Space}
+		sleep 400
 		tooltip
 	}
 	}
 WinActivate ahk_id %WorkingWin%
 tooltip End Script
-Sleep 1000
+Sleep 800
 tooltip			
 Exit
 ;END SCRIPT
