@@ -169,6 +169,7 @@ local config = {
 lmc_set_handler('MACROS', function(button, direction)
 	--Ignoring upstrokes ensures keystrokes are not registered twice, but activates faster than ignoring downstrokes. It also allows press and hold behaviour
         if (direction == 0) then return end -- ignore key upstrokes.
+        if (button == 144) then return end  -- don't send numlock because it sends before and after the key, effectively overwriting
 	if type(config[button]) == "string" then
                 print(' ')
                 print('Your key ID number is:   ' .. button)

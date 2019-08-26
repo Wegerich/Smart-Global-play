@@ -26,15 +26,15 @@ else if(key = "enter")
 	SoundGet, OriginalVolSndGet
 	;msgbox, %OriginalVolSndGet% ;allows you to check when debugging
 	SoundSet, OriginalVolSndGet / 2
-	Sleep 600
-	SoundSet, OriginalVolSndGet / 3
-	Sleep 600
+	Sleep 700
 	SoundSet, OriginalVolSndGet / 4
+	Sleep 600
+	SoundSet, OriginalVolSndGet / 5
 	Sleep 20000
 	SoundSet, OriginalVolSndGet / 2
-	Sleep 600
+	Sleep 500
 	SoundSet, OriginalVolSndGet / 1.5
-	Sleep 600
+	Sleep 500
 	SoundSet, OriginalVolSndGet 
 }
 else if(key = "numMult")
