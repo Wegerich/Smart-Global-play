@@ -8,7 +8,7 @@ Menu, Tray, Icon, shell32.dll, 283 ; this changes the tray icon to a little keyb
 #WinActivateForce ;https://autohotkey.com/docs/commands/_WinActivateForce.htm
 
 
-Menu,Tray,Tip, Second Keyboard Control
+Menu,Tray,Tip, AHK Second Keyboard Control
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -36,13 +36,16 @@ else if(key = "num0") 	{
 	Run,  BossKeyToHideSocials.ahk, %A_WorkingDir%
 	}
 else if(key = "insert")	{	
-		Run,  BossKeyToHideSocials, %A_WorkingDir%
+	Run,  BossKeyToHideSocials.ahk, %A_WorkingDir%
 	}
 else if(key = "num1") {
 	Run,  Toggle Rear Speaker Channels.ahk, %A_WorkingDir%
 	}
 else if(key = "end") {
 	Run,  Toggle Rear Speaker Channels.ahk, %A_WorkingDir%
+	}
+else if(key = "enter") {
+	Run,  Temporarily drop volume.ahk, %A_WorkingDir%
 	}
 else if(key = "num2")
 Send {Numpad2}
@@ -68,7 +71,8 @@ else if(key = "numDiv")
 	{
 		;Skip to the next track in VDJ by sending the M key
 		WinGet, winid ,, A
-		WinActivate, VirtualDJ, 
+		WinActivate, VirtualDJ,
+		Send, {Shift Down}{Tab}{Shift Up}		
 		Send, {m}
 		WinActivate ahk_id %winid%
 		Return

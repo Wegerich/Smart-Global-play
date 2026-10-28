@@ -6,7 +6,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #MaxHotkeysPerInterval 2000
 #WinActivateForce ;https://autohotkey.com/docs/commands/_WinActivateForce.htm
 
-#SingleInstance		; Only allows one instance of the script to run.
+;#SingleInstance		; Only allows one instance of the script to run.
 
 ;Get the rear-right speaker volume
 Clipboard = 
@@ -34,16 +34,32 @@ if (Chan5Vol = 100.34){
 	;If channel 5 is already 0 then Mute channel 6
 	If (Chan4Vol > 100.34)   {
 		Run SoundVolumeView.exe /ChangeVolumeChannel "Rear Panel Speakers" 4 -100 
+		Tooltip, Both speakers muted
+		MsgBox, 1, , Both speakers muted, 0.75
+		
+		SoundBeep, 200
+		Sleep, 750
+		Tooltip
 		}
 		else 		{
 		;If both channels are 0 then  is 0 then Mute channel 6
 		SoundGet, OriginalVolSndGet
 		Run SoundVolumeView.exe /SetVolumeChannels "Rear Panel Speakers" * * * * %OriginalVolSndGet% %OriginalVolSndGet% * *
+		Tooltip, Both speakers on
+		MsgBox, 1, , Both speakers on, 0.75
+		SoundBeep, 200
+		Sleep, 1000
+		Tooltip
 		}
 	
 	;If both speakers were muted then set them back to the volume of the device
 }
 else {
 	;If channel 5 was loud then mute it
+	Tooltip, That speaker muted
 	Run SoundVolumeView.exe /ChangeVolumeChannel "Rear Panel Speakers" 5 -100 
+	MsgBox, 1, , That speaker muted, 0.75
+	SoundBeep, 200
+	Sleep, 750
+	Tooltip
 }

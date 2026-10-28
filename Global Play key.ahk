@@ -5,60 +5,155 @@ SendMode Input
 Menu, Tray, Icon, shell32.dll, 138 ; this changes the tray icon to a little play icon
 #SingleInstance force ;only one instance of this script may run at a time!
 #MaxHotkeysPerInterval 2000
-#WinActivateForce ;https://autohotkey.com/docs/commands/_WinActivateForce.htm
+#WinActivateForce ;https://autohotkey.com/docs/commands/_WinActivateForce.htm12:44 -
+#Include %A_ScriptDir%\VA.ahk
 
+	
 #IfWinActive
 
 ;Media play key functions.
 $Media_Play_Pause::
 {
-filedelete, %A_WorkingDir%\keypressed.txt
-fileappend, numMult, %A_WorkingDir%\keypressed.txt
+filedelete, %A_ScriptDir%\keypressed.txt
+fileappend, numMult, %A_ScriptDir%\keypressed.txt
 ;Don't return here - want to trigger next set of code as if F23 was pressed.
+Goto MediaPlayPauseReplacementScript
+Exit
 }
 
+^#m::
+FormatTime, TimeString, T14, Time
+Send, %TimeString% - 
+Return
+
+^+p::
+FormatTime, TheDateToday,, yyyy-MM-dd hh:mm
+Send, %TheDateToday%
+Return
+
+;SemiColon
+^+SC027::
+FormatTime, TheDateToday,, yyyy-MM-dd hh:mm
+Send, %TheDateToday%
+Return
+
 ~F23::
-FileRead, key, %A_WorkingDir%\keypressed.txt
+MediaPlayPauseReplacementScript:
+FileRead, key, %A_ScriptDir%\keypressed.txt
 If (key = "sample_keyname")
-Send {Volume_Down}
-else if(key = "enter")
 {
-	SoundGet, OriginalVolSndGet
-	;msgbox, %OriginalVolSndGet% ;allows you to check when debugging
-	SoundSet, OriginalVolSndGet / 2
-	Sleep 700
-	SoundSet, OriginalVolSndGet / 4
-	Sleep 600
-	SoundSet, OriginalVolSndGet / 5
-	Sleep 20000
-	SoundSet, OriginalVolSndGet / 2
-	Sleep 500
-	SoundSet, OriginalVolSndGet / 1.5
-	Sleep 500
-	SoundSet, OriginalVolSndGet 
+	Send {Volume_Down}
+} else if(key = "numMult") {
+	FileAppend, Consumed, %A_ScriptDir%\keypressed.txt
 }
-else if(key = "numMult")
-{
+
+
+OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Starting Play key script
+RestartTheMediaKey:
+OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Script Started
 WinGet, WorkingWin ,, A ;Get current window ID
 SetTitleMatchMode 2 ; 2: A window's title can contain WinTitle anywhere inside it to be a match. 
+
+;Capture the volume at the start
+startsound := 0
+startsound := GetAverageSoundLevel()
+OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: startsound was %startsound%
+
 
 
 IfWinExist, Radio 1,
 	{
 		WinActivate, Radio 1,
-		Send, {Space}{PgUp 4}
-		Sleep 20
+		WinGet, MusicWin ,, A ;Get current window ID
+		sleep 50
+		;MouseMove, 50, 1000
+		;MouseClick, Left,  50, 1000
+		;Send, {LControl down}m{LControl up}
+		Send, {PgUp}{PgUp}{PgUp}
+		;Click, WheelUp 10
+		Sleep 100
+		Click, 535, 595
 		WinActivate ahk_id %WorkingWin%
-	Return
+		MouseMove, 1250, 500
+		Return
 	}
+	
+IfWinExist, Mixcloud,
+	{
+		
+		WinActivate, Mixcloud,
+		WinGet, MusicWin ,, A ;Get current window ID
+		sleep 50
+		;MouseMove, 50, 1000
+		;MouseClick, Left,  300, 1000
+		;Sleep 100
+		;Mute to be certain that silcence will commence.
+		;Send, {LControl down}m{LControl up}
+		MouseClick, Left,  1040, 1800 ;Prevent issues from playlist
+		Sleep 200
+		MouseClick, Left,  45, 1860
+		Sleep 10
+		WinActivate ahk_id %WorkingWin%
+		MouseMove, 1250, 500
+		;ExitIfSilentAtStart(startsound)
+		;VolumeAfterAction := GetAverageSoundLevel()
+		;Goto, Restartplay
+		Return
+	}
+	
+	
+IfWinExist, MIRACLE,
+	{
+		
+		WinActivate, MIRACLE,
+		WinGet, MusicWin ,, A ;Get current window ID
+		sleep 50
+		;MouseMove, 50, 1000
+		;MouseClick, Left,  300, 1000
+		;Sleep 100
+		;Mute to be certain that silcence will commence.
+		;Send, {LControl down}m{LControl up}
+		MouseClick, Left,  66, 1848
+		Sleep 10
+		WinActivate ahk_id %WorkingWin%
+		MouseMove, 1250, 500
+		;ExitIfSilentAtStart(startsound)
+		;VolumeAfterAction := GetAverageSoundLevel()
+		;Goto, Restartplay
+		Return
+	}	
+	
+IfWinExist, SoundCloud,
+	{
+		
+		WinActivate, SoundCloud,
+		WinGet, MusicWin ,, A ;Get current window ID
+		sleep 50
+		;MouseMove, 50, 1000
+		;MouseClick, Left,  300, 1000
+		;Sleep 100
+		;Mute to be certain that silcence will commence.
+		;Send, {LControl down}m{LControl up}
+		MouseClick, Left,  66, 1848
+		Sleep 10
+		WinActivate ahk_id %WorkingWin%
+		MouseMove, 1250, 500
+		;ExitIfSilentAtStart(startsound)
+		;VolumeAfterAction := GetAverageSoundLevel()
+		;Goto, Restartplay
+		Return
+	}		
 
 IfWinExist, Firefox,
 	{
 		WinActivate, Firefox,
 		WinGet, MusicWin ,, A ;Get current window ID
-		Send, {Space}
+		Send, {Space}{PgUp}
 		WinActivate ahk_id %WorkingWin%
-		Goto, Restartplay
+		;ExitIfSilentAtStart(startsound)
+		;VolumeAfterAction := GetAverageSoundLevel()
+		;Goto, Restartplay
+		Return
 	}
 
 
@@ -68,7 +163,9 @@ IfWinExist, VLC,
 		WinGet, MusicWin ,, A ;Get current window ID
 		Send, {Space}
 		WinActivate ahk_id %WorkingWin%
-	Return
+		;ExitIfSilentAtStart(startsound)
+		;VolumeAfterAction := GetAverageSoundLevel()
+		Return
 	}
 	
 IfWinExist, YouTube,
@@ -78,22 +175,24 @@ IfWinExist, YouTube,
 			WinActivate, YouTube,
 			Send, k
 			WinActivate ahk_id %WorkingWin%
-			return
+			ExitIfSilentAtStart(startsound)
+			VolumeAfterAction := GetAverageSoundLevel()
+			Return
 		}
 	}	
 
-;Check for silence
-;Set up sound measurement
-#SingleInstance, Force
-audioMeter := VA_GetAudioMeter()
-VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue)
-tooltip Sound level: %peakvalue%
-Sleep, 100
-VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
-peakValue += peakValue2
-peakValue /= 2
 
-;Everything after this point is used to monitor sound volume in Virtual DJ. If you don't use it then you can delete it all safely.	
+ 
+
+If (VolumeAfterAction < startsound) && (VolumeAfterAction < 0.001 )
+	{
+	ScriptStoppedSoundCompletely := true
+	} else {
+	ScriptStoppedSoundCompletely := false
+	}
+	
+
+
 IfWinExist, VirtualDJ, 
 	{
 	WinActivate, VirtualDJ, 
@@ -101,56 +200,86 @@ IfWinExist, VirtualDJ,
 	Sleep 10
 	Send, {space} 
 	WinActivate ahk_id %WorkingWin%
+	Return
+	VolumeAfterAction := GetAverageSoundLevel()
+	;If sound did not start, try again but tab out of search.
+	If (VolumeAfterAction < 0.001 && startsound < 0.001) 
+		{
+		WinActivate, VirtualDJ, 
+		WinGet, MusicWin ,, A ;Get current window ID
+		Sleep 10
+		Send, {tab}{space}
+		}
 	}
 	
 	;If there was silence at the start of the script, play the music and then exit the script immediately. 
-	if (peakvalue < 0.001 )
-		{
-			tooltip Silence detected at start. Exiting.
-			Sleep 2000
-			tooltip
-			Exit		
-		}	
+	ExitIfSilentAtStart(startsound)	
 		
 	;While sound is playing, do not prompt to restart playback.
-	SleptTime := 0
-	Restartplay:
+	SleptTime := 0 ;Reset
+Restartplay:
+
+IfWinExist Zoiper
+{
+	OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Zoiper active. Sleep for 1min and restart
+	Sleep, 60000
+	GoTo Restartplay	
+}
+IfWinActive Team Fortress
+{
+	OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Team Fortress Active. Exiting
+	Exit
+}
 	
 	;tooltip Check peak sound level every 10s %SleptTime%
 	;If the SleptTime is complete or there is silence, ignore this loop
+	peakValue := GetAverageSoundLevel()
 	while (peakvalue > 0.001 and SleptTime < 180000)
 	{
 		; Get the peak audioMeter value across all channels.
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue)
+		peakValue := GetAverageSoundLevel()
 		;tooltip, %SleptTime% %peakValue%
 		tooltip, marker1 %peakvalue% 
-		Sleep, 1000
+		Sleep, 500
 		tooltip
-		SleptTime += 10000
-		Sleep, 9000
+		
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: SleptTime is %SleptTime% and volume is %peakValue%
+		
+		CheckOverridesTimer := 0
+		While (CheckOverridesTimer < 10000)
+		{
+			OverrideRequested := CheckForOverride()
+			If (OverrideRequested = True)
+			{
+				Goto RestartTheMediaKey
+			}
+			Sleep, 1000
+			CheckOverridesTimer += 1000
+			SleptTime += 1000
+		}
 	}
-	;Tooltip Music is not playing. Rest for another 5s then recheck soundlevel
-	sleep, 5000
-	VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue)
-	
-	
-	Tooltip Second check %peakValue%
-	Sleep 800
-	Tooltip
-	if (peakvalue > 0.001 and SleptTime < 180000)
+
+OverrideRequested := CheckForOverride()
+		If (OverrideRequested = True)
+		{
+			Goto RestartTheMediaKey
+		}
+
+OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: No override. Going slowly. 
+peakValue := GetAverageSoundLevel()
+OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Second check volume: %peakValue%
+
+	peakValue := GetAverageSoundLevel()
+	If (peakvalue > 0.001 and SleptTime < 180000)
 	{
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Sound is playing. Go back to waiting. 
 		;tooltip Sound level %peakvalue%. Restartplay
 		;Sleep 1000
 		;tooltip
 		GoTo Restartplay		
 	}
 	
-	;If the sleep timer has been fulfilled then check if
-	;the original media player is playing and quit if so
-	;msgbox %SleptTime%
-	
-	Tooltip
-	if (SleptTime > 179000) 
+	If (SleptTime > 179000) 
 	{
 		;If user is active, run the script for another 20s 
 		;to prevent disturbing them with media player check;
@@ -162,131 +291,257 @@ IfWinExist, VirtualDJ,
 			Tooltip
 			Sleep 800
 		}
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: User inactive - muting to check vdj
+		
 		;If user is not active, mute the main player and measure sound output
 		WinGet, WorkingWin ,, A ;Get current window ID
-		WinActivate ahk_id %MusicWin%
-		;This key combination mutes virtual dj and pause/plays others.
-		Send, {Ctrl Down}.{Ctrl Up}{space}
-		Sleep, 50
-		WinActivate ahk_id %WorkingWin%
+		IfWinExist, VirtualDJ, 
+		{
+			WinActivate ahk_id %MusicWin%
+			;This key combination mutes virtual dj and pause/plays others.
+			Send, {Ctrl Down}.{Ctrl Up}{space}
+			Sleep 200
+			VDJmutedVol := GetInstantSoundLevel(VDJmutedVol)
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: VDJ Volume when muted: %VDJmutedVol%
+			Send, {Ctrl Down}.{Ctrl Up}{space}
+		}
 		
-		
-		Sleep, 50
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, VDJmutedVol)
-		Sleep, 100
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
-		;tooltip %VDJmutedVol% 
-		VDJmutedVol += peakValue2
 		;If sound is playing it must not be coming from VDJ as that just got muted.
 		;Therefore no need to keep measuring.
-		if VDJmutedVol > 0.001
+		If (VDJmutedVol > 0.001)
 		{
-		GoTo Finishmeasurement
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Sound is playing while VDJ is muted, therefore sound must be from another app.
 		}
-		Sleep, 100
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
-		VDJmutedVol += peakValue2
-		Sleep, 100
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
-		VDJmutedVol += peakValue2
-		;Tooltip %VDJmutedVol%
-		VDJmutedVol /= 4
-		tooltip
-Finishmeasurement:		
-		;If sound was zero after the above then the VDJ must have been started manually.
-		;If sound was playing while the above was running, it must be coming from somewhere else.
-		WinActivate ahk_id %MusicWin%
-		;tooltip %MusicWin%
-		Send, {space}{Ctrl Down}.{Ctrl Up}
+		Else
+		{
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%:  Computer is silent when VDJ is muted, therefore sound must be from VDJ
+		}
+		
 		Sleep, 50
+		GoTo Finishmeasurement
 		WinActivate ahk_id %WorkingWin%
-		VA_IAudioMeterInformation_GetPeakValue(audioMeter, Currentvolume)
-			Tooltip Current volume is %Currentvolume% 
-		;So if the sound is now coming from VDJ, quit the script. 
-		if (VDJmutedVol < 0.001 and Currentvolume > 0.001)
-		{
-			Tooltip It appears VDJ is playing sound. Current Volume %Currentvolume% Exiting.
-			Sleep 2000
-			Tooltip
-			Exit		
-		}
+		
+	} Else {	;If the timer did not complete
+			
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Detailed check to see if VDJ is source of sound. 
+			WinGet, WorkingWin ,, A ;Get current window ID
+			WinActivate ahk_id %MusicWin%
+			Send, {Ctrl Down}.{Ctrl Up}{space}
+			Sleep, 100
+			VDJmutedVol2 := GetInstantSoundLevel(VDJmutedVol2)
+			VDJmutedVol += VDJmutedVol2
+			Sleep, 100
+			VDJmutedVol2 := GetInstantSoundLevel(VDJmutedVol2)
+			VDJmutedVol += VDJmutedVol2
+			Sleep, 100
+			VDJmutedVol2 := GetInstantSoundLevel(VDJmutedVol2)
+			VDJmutedVol += VDJmutedVol2
+			VDJmutedVol /= 3
+			Send, {Ctrl Down}.{Ctrl Up}{space}
+			Sleep, 50
+			WinActivate ahk_id %WorkingWin%
+			
+			If (VDJmutedVol > 0.001) 
+			{
+				OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Sound is playing while VDJ is muted. SleptTime: %SleptTime%
+			} Else {
+				OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: VDJ is silent when muted. SleptTime: %SleptTime%
+			}
+	}
+	
+Finishmeasurement:		
+	;If sound was zero after the above then the VDJ must have been started manually.
+	;If sound was playing while the above was running, it must be coming from somewhere else.
+
+	while (A_TimeIdle < 1000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
+	{	
+		Tooltip User active.
+		Sleep 200
+		Tooltip
+		Sleep 800
+	}
+	
+		
+	Currentvolume := GetAverageSoundLevel()
+		Tooltip Current volume is %Currentvolume% 
+	;So if the sound is now coming from VDJ, quit the script. 
+	
+	If (VDJmutedVol < 0.001 and Currentvolume > 0.001)
+	{
+		Tooltip It appears VDJ is playing sound. Current volume %Currentvolume% Exiting.
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: It appears VDJ is playing sound and is the main source of sound. Current volume %Currentvolume% Exiting.
+		Sleep 2000
+		Tooltip
+		Exit		
 	}
 
 	
+	;Restart the script if youtube is open - VDJ should obviously not be played
 	IfWinExist YouTube
-;Restart the script if youtube is open - VDJ should obviously not be played
-	{
-		Tooltip YouTube detected, restarting
-		Sleep 2000
-		Tooltip
-		while (A_TimeIdle > 1000) ;While user is INactive
+	{	
+		IfWinActive YouTube
 		{
-			;Tooltip User active
-			Sleep 500
-			;Tooltip
+			SoundStatus := "SoundIsPlayingFromYoutube"
+			Sleep 10000
+			Goto restartplay
 		}
-		SleptTime = 0
-		GoTo Restartplay		
+		else
+		{
+			while (A_TimeIdle < 2000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
+			{	
+				Tooltip User active.
+				Sleep 200
+				Tooltip
+				Sleep 1800
+			}
+			PreCheckVolume := GetAverageSoundLevel()
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: PreCheckVolume of youtube is %PreCheckVolume%  
+			
+			If (OverrideRequested = True)
+			{
+				Goto RestartTheMediaKey
+			}
+			
+			IfWinNotActive YouTube - Google Chrome
+			{
+				WinActivate YouTube - Google Chrome
+			}
+			Else
+			{
+				YoutubeWasTheActiveWindow := true
+			}
+			Send, {k}
+			Sleep 300
+			YTMutedVolume := GetInstantSoundLevel("YTMutedVolume")
+			;WinActivate YouTube - Google Chrome
+			;WinWait YouTube - Google Chrome
+			Send, {k}
+			
+			while (A_TimeIdle < 2000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
+			{	
+				Tooltip User active.
+				Sleep 200
+				Tooltip
+				Sleep 800
+			}
+			
+			
+			If (PreCheckVolume < 0.001) && (YTMutedVolume < 0.001)
+			{ 
+				SoundStatus := "NoSoundIsPlaying"
+			}
+			Else If (PreCheckVolume > 0.001) && (YTMutedVolume > 0.001)
+			{ 	
+				SoundStatus := "SoundIsComingFromSomewhereNotYoutube" 
+			}
+			Else If (PreCheckVolume > 0.001) && (YTMutedVolume < 0.001)
+			{ 
+				SoundStatus := "SoundIsPlayingFromYoutube" 
+				OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Computer goes silent when youtube is muted. 
+			}
+			Else If (PreCheckVolume < 0.001) && (YTMutedVolume > 0.001)
+			{ 
+				SoundStatus := "YoutubeWasAlreadyMuted" 
+				OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Youtube was already muted when AHK checked. This is not supposed to happen. Exiting.
+				Exit
+			}
+			
+			;Don't mess with windows if the YT window was active.
+			If (YoutubeWasTheActiveWindow != True)
+			{
+				WinActivate ahk_id %WorkingWin%
+			}
+			If (SoundStatus = "SoundIsComingFromSomewhereNotYoutube")
+			{
+				Goto PresentUnusedYoutubeWindow
+			}
+
+			
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: YouTube detected - restarting. SoundStatus = %SoundStatus%
+			Sleep 30000
+			while (A_TimeIdle > 1000) ;While user is INactive
+			{
+				;Tooltip User active
+				Sleep 500
+				;Tooltip
+			}
+			SleptTime = 0
+			GoTo Restartplay
+		}
 	}
 	
 
 	ifWinExist Duolingo
 		{
-		Tooltip Duolingo detected, restarting
-		Sleep 2000
-		Tooltip
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Duolingo detected, restarting
 		while (A_TimeIdle > 1000) ;While user is INactive
 		{
 			;Tooltip User active
-			Sleep 500
+			Sleep 5000
 			;Tooltip
 		}
 		SleptTime = 0
 		GoTo Restartplay		
 	}
 	
-	VA_IAudioMeterInformation_GetPeakValue(audioMeter, Currentvolume)
-	Sleep, 100
-	VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
-	;tooltip %Currentvolume% 
-	Currentvolume += peakValue2
+	Currentvolume := GetAverageSoundLevel()
 
-	Tooltip YouTube not detected. %Currentvolume%
-	sleep 900
-	Tooltip
+	OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: YouTube not detected. CurrVolume %Currentvolume%
 
 if (Currentvolume > 0.001)
-		{
-			Tooltip Sound playing at %Currentvolume%. Relooping.
-			Sleep 800
-			Tooltip
-			SleptTime = 0
-			GoTo Restartplay		
-		}
+	{
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Sound playing at %Currentvolume%. Relooping.
+		SleptTime = 0
+		GoTo Restartplay		
+	}
 
-		;Wait until user is active	
-		while (A_TimeIdle > 5000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
-		{
-			;Tooltip User inactive
-			Sleep 2500
-			Tooltip
-		}
-		while (A_TimeIdle < 1000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
-		{
-			;Tooltip User active
-			Sleep 500
-			Tooltip
-		}
+
+;msgbox Still silent after second check. Ask if music playback desired.
+WinGet, WorkingWin ,, A ;Get current window ID
 	
-	;msgbox Still silent after second check. Ask if music playback desired.
-	WinGet, WorkingWin ,, A ;Get current window ID
-		MsgBox, 3, , Main media player not detected? Do you want to restart playback?, 60
+LastKeypressedContents := GetKeypressedTXTContents(True)
+If (LastKeypressedContents = "NumMult")
+	{
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Not asking permission due to finding "NumMult"
+		MsgBoxWasYes := true
+		Goto SkipAskingAndJustPlay
+	} 	
+
+	;Wait until user is active	
+	while (A_TimeIdle > 5000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
+	{
+		;Tooltip User inactive
+		Sleep 2500
+		Tooltip
+	}
+
+CheckForOverrideWhileShowingMsgBox:	
+	while (A_TimeIdle < 1000) ;While user is active ;Timeidle is used instead of timeidlephysical because the main user is using a networked (non-physical) mouse and keyboard.
+	{
+		;Tooltip User active
+		Sleep 500
+		Tooltip
+	}
+
+
+LastKeypressedContents := GetKeypressedTXTContents(True)
+If (LastKeypressedContents = "NumMult")
+	{
+		OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Not asking permission due to finding "NumMult"
+		MsgBoxWasYes := true
+		Goto SkipAskingAndJustPlay
+	} 	
+
+MsgBox, 3, , Main media player not detected? Do you want to restart playback?, 1
 	IfMsgBox Timeout
 	{
-		tooltip Messagebox timeout. Exiting %peakvalue%
-		Sleep 5000
-		tooltip
-		Exit
+		If (MsgTimer >= 60) ;Allow x timeouts until quitting.
+		{
+			Exit
+		} Else {
+			MsgTimer =+ 1
+			Goto CheckForOverrideWhileShowingMsgBox
+		}
 	}
 	Else IfMsgBox No ;Don't restart play
 	{
@@ -308,38 +563,134 @@ if (Currentvolume > 0.001)
 
 	IfMsgBox Yes 
 	{
-	WinActivate ahk_id %MusicWin%
-	IfWinActive VirtualDJ	
-	{
-		tooltip test
-		WinActivate VirtualDJ ;Sometimes VDJ wasn't activating properly
-		sleep 10
-		Send, ^b ;I have coded this to set the crossfader to 0% and then slide it back, to prevent any mistakes with changing the volume while paused.
-		Sleep, 450
-		tooltip
-		WinActivate ahk_id %WorkingWin%
-		tooltip End Script
-		Sleep 100
-		tooltip	
-		Exit
+		MsgBoxWasYes := true
+	} Else {
+		MsgBoxWasYes := false
 	}
-	IfWinNotActive VirtualDJ
+
+
+
+SkipAskingAndJustPlay:
+
+If (MsgBoxWasYes = true)
 	{
 		WinActivate ahk_id %MusicWin%
-		Tooltip other media player
-		sleep 200
-		Send,{Space}
-		sleep 400
-		tooltip
-	}
+		IfWinActive VirtualDJ	
+		{
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Restarting VDJ and ending the script
+			WinActivate VirtualDJ ;Sometimes VDJ wasn't activating properly
+			sleep 5
+			Send,  z ;I have coded this to set the crossfader to 0% and then slide it back, to prevent any mistakes with changing the volume while paused.
+			WinActivate ahk_id %WorkingWin%
+			Exit
+		}
+		IfWinNotActive VirtualDJ
+		{
+			WinActivate ahk_id %MusicWin%
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Restarting media player (not VDJ)
+			sleep 50
+			Send,{Space}
+		}
 	}
 WinActivate ahk_id %WorkingWin%
 tooltip End Script
 Sleep 800
 tooltip			
 Exit
-;END SCRIPT
+Return
+
+;Check for sound level
+;Set up sound measurement
+GetAverageSoundLevel()
+{
+	#SingleInstance, Force
+	audioMeter := VA_GetAudioMeter()
+	peakValue := 0
+	VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue)
+	Sleep, 200
+	VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue2)
+	peakValue += peakValue2
+	peakValue /= 2
+	tooltip Sound level: %peakvalue%
+	sleep 100
+	tooltip 
+	return %peakvalue%
 }
+
+GetInstantSoundLevel(ReasonForRequest:= "No origin given")
+{
+	#SingleInstance, Force
+	audioMeter := VA_GetAudioMeter()
+	VA_IAudioMeterInformation_GetPeakValue(audioMeter, peakValue)
+	;OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Instant Sound Level %peakValue% requested by %ReasonForRequest% section
+	return %peakvalue%
+}
+
+ExitIfSilentAtStart(startsound)
+{
+	If (startsound < 0.001)
+		{
+			tooltip Silence detected at start. Exiting.
+			Sleep 500
+			tooltip
+			Exit
+		}
+	Return startsound
+}
+
+GetKeypressedTXTContents(AppendConsumption)
+{
+	FileRead, key, %A_ScriptDir%\keypressed.txt
+	If (key = "sample_keyname")
+	{
+		Send {Volume_Down}
+	} else if(key = "numMult") && (AppendConsumption = True) {
+		FileAppend, Consumed, %A_ScriptDir%\keypressed.txt
+	}
+	Return key
+}
+
+PresentUnusedYoutubeWindow:
+	{
+		IfWinNotActive YouTube - Google Chrome
+		{
+			WinActivate YouTube - Google Chrome
+			Sleep 10
+		}
+		
+		IfWinActive YouTube - Google Chrome
+		{
+		ToolTip Are you finished with this Youtube Tab?
+		Sleep 1000
+		Tooltip
+		}
+	Return
+	}
+CheckForOverride()
+	{
+		LastKeypressedContents := GetKeypressedTXTContents(False)
+		If (LastKeypressedContents = "NumMult")
+		{
+			IfWinNotActive YouTube - Google Chrome
+			{
+				WinActivate YouTube - Google Chrome
+				WinWait, YouTube - Google Chrome, , 0.01
+			}
+			IfWinActive YouTube - Google Chrome
+			{
+				ToolTip Are you finished with this Youtube Tab?
+				Sleep 1000
+				Tooltip
+			}
+			OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Override detected. Restarting sequence.
+			Return True
+		} Else{
+			Return False
+		}		
+		
+	}
+;END SCRIPT
+
 
 Return ;from luamacros F23
 
@@ -349,6 +700,7 @@ $Media_Next::
 {
 WinGet, winid ,, A
 WinActivate, VirtualDJ, 
+Send, {Shift Down}{Tab}{Shift Up}
 Send, {m}
 WinActivate ahk_id %winid%
 Return

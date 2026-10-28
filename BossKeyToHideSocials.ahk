@@ -5,8 +5,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 
 SetTitleMatchMode 2
-WinActivate, Franz
-IfWinActive, Franz,
+WinActivate, Ferdi
+IfWinActive, Ferdi,
 {
 Send, ^4
 }
@@ -20,17 +20,30 @@ IfWinActive, Facebook,
 {
 Send, {F5}
 }
-WinClose, Franz
+WinClose, Ferdi
 WinClose, Discord
 WinClose, Whatsapp
 WinMinimize, Outlook,
-WinActivate, erowid
+WinMinimize, rasset split,
+WinActivate, erowid,
 WinActivate, VirtualDJ
+sleep 20
 WinActivate, Firefox,
-WinActivate, GJ - Yah
-IfWinActive, GJ - Yah,
-{
-Send, ^w
-}
+WinActivate, Mixcloud,
+
+
 WinActivate, Reddit
-	
+sleep 20
+
+Run, chrome.exe, C:\Program Files (x86)\Google\Chrome\Application
+
+	sleep 10
+WinActivate, New Tab
+	sleep 100
+IfWinActive, New Tab
+{
+	Send, reddit.com
+	sleep 10
+	Send, {Enter}
+	return
+}

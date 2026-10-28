@@ -6,8 +6,7 @@
 clear()
 
 -- 'Set this to 0000AAA for your first run
-local keyboardIdentifier = '102490C9'
-
+local keyboardIdentifier = '106C2A6A'
 
 --You can use this section to list all the connected keyboards.
 --You need to get the unique code (four numbers and three letters usually but sometimes different) for the keyboard with name "MACROS"
@@ -174,7 +173,7 @@ lmc_set_handler('MACROS', function(button, direction)
                 print(' ')
                 print('Your key ID number is:   ' .. button)
 				print('It was assigned string:    ' .. config[button])
-                                if config[button] == "numMult" or config[button] == "enter" then
+                                if config[button] == "numMult" then
                                    -- use this section for keys which will trigger scripts which aren't instantaneous
                                    --(for example, ones which monitor volume)
                                    PlayscriptAHK(config[button])
