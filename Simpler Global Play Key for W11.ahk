@@ -64,13 +64,19 @@ Return
 ; "Visual Studio Code" or "NanoGPT".
 #If WinActive("Visual Studio Code") or WinActive("NanoGPT")
 ^+v::
+	; The backtick is AHK v1's escape character, so writing the fence literally
+	; ("```") sends only one backtick: the first two act as an escape pair and
+	; the third is a dangling escape. Neither {Raw} nor {Text} changes that.
+	; Building the fence with Chr(96) keeps it exact, three backticks long.
+	fenceMarker := Chr(96) Chr(96) Chr(96)
 	SendInput, +{Enter} ; newline without submitting in the opencode terminal
-	SendInput, {Raw}```
+	SendInput, %fenceMarker%
+	SendInput, +{Enter}
 	Sleep, 40
 	SendInput, ^v
 	Sleep, 400 ; give the target app time to finish pasting before closing the fence
 	SendInput, +{Enter}
-	SendInput, {Raw}```
+	SendInput, %fenceMarker%
 	Return
 #If
 
