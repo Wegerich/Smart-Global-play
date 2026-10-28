@@ -6,7 +6,6 @@ Menu, Tray, Icon, shell32.dll, 138 ;play icon
 #SingleInstance force 
 #MaxHotkeysPerInterval 2000
 #WinActivateForce ;might prevent task bar buttons from flashing when different windows are activated quickly one after the other. https://www.autohotkey.com/docs/v1/lib/_WinActivateForce.htm
-#Include %A_ScriptDir%\VA.ahk
 
 ;OutputDebug tool requires opening windows DebugView
 
@@ -105,17 +104,31 @@ If (key = "sample_keyname")
 
 
 OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Starting Play key script
-RestartTheMediaKey:
+;RestartTheMediaKey:
 OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Script Started
 WinGet, WorkingWin ,, A ;Get current window ID
 SetTitleMatchMode 2 ; 2: A window's title can contain WinTitle anywhere inside it to be a match. 
 
+; Do nothing while a game is in the foreground. This check must come before the
+; branches below, because every one of them returns.
+IfWinActive Team Fortress
+{
+	OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Team Fortress Active. Exiting
+	Exit
+}
 
 IfWinExist, VirtualDJ
 {
     WinActivate, VirtualDJ
+    WinWaitActive, VirtualDJ,,1
+    If ErrorLevel
+    {
+        ; Never send the play key to the wrong window.
+        OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: VirtualDJ did not activate, aborting
+        WinActivate, ahk_id %WorkingWin%
+        Return
+    }
     WinGet, MusicWin ,, A
-    Sleep, 10
     Send, {Space}
     WinActivate, ahk_id %WorkingWin%
     Return
@@ -127,7 +140,14 @@ else IfWinExist, ahk_exe audacity.exe
 
     ; Switch to Audacity
     WinActivate, ahk_exe audacity.exe
-	WinWait, ahk_exe audacity.exe,,0.1
+	WinWaitActive, ahk_exe audacity.exe,,1
+    If ErrorLevel
+    {
+        ; Never send the play key to the wrong window.
+        OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Audacity did not activate, aborting
+        WinActivate, ahk_id %WorkingWin%
+        Return
+    }
     WinGet, MusicWin ,, A
 
     ; Send "s" to Audacity
@@ -138,7 +158,7 @@ else IfWinExist, ahk_exe audacity.exe
 
     ; Switch back to the previously active window
     WinActivate, ahk_id %WorkingWin%
-	WinWait, ahk_id %WorkingWin%,,0.1
+	WinWaitActive, ahk_id %WorkingWin%,,1
     Return
 }
 else
@@ -149,12 +169,6 @@ else
     Return
 }
 
-IfWinActive Team Fortress
-{
-	OutputDebug, %A_Hour%:%A_Min%:%A_Sec%: Team Fortress Active. Exiting
-	Exit
-}
-
 ; ####################################################################
 ; ##ONshape HELPER FUNCTION
 ; ####################################################################
@@ -162,7 +176,14 @@ IfWinActive Team Fortress
 ; This function checks if the active window is Firefox and if specific
 ; pixels match the Onshape interface colors.
 IsOnshapeActive_ByPixel() {
-    ; First, check if a Firefox window is active. This is fast and
+    ; Cheap title check first: a page must actually be Onshape before any
+    ; pixel sampling happens, so ordinary white pages in Firefox are never
+    ; mistaken for Onshape (which used to swallow PgUp on most websites).
+    if !WinActive("Onshape") {
+        return false ; Title does not mention Onshape.
+    }
+
+    ; Then check if a Firefox window is active. This is fast and
     ; avoids running pixel checks on other applications.
     if !WinActive("ahk_class MozillaWindowClass") {
         return false ; Not Firefox, so definitely not Onshape.
@@ -204,21 +225,16 @@ Return ;from luamacros F23
 ;Media Skip Key skips track
 $Media_Next::
 {
+	; Without VirtualDJ this must do nothing at all, otherwise the "m"
+	; below would be typed into whatever window is focused.
+	IfWinNotExist, VirtualDJ
+		Return
 	WinGet, winid ,, A
-	WinActivate, VirtualDJ, 
+	WinActivate, VirtualDJ,
+	WinWaitActive, VirtualDJ,,1
+	If ErrorLevel
+		Return
 	Send, {Shift Down}{Tab}{Shift Up}
-	Send, {m}
-	WinActivate ahk_id %winid%
-	Return
-}
-
-
-;Home button skips track for keyboards without $Media_Next::
-
-;Get current window
-	WinGet, winid ,, A
-{
-	WinActivate, VirtualDJ, 
 	Send, {m}
 	WinActivate ahk_id %winid%
 	Return
