@@ -60,25 +60,48 @@ Return
 ; ####################################################################
 ; Shift+Enter is used for the newlines (not plain Enter) so that this also
 ; works in the opencode terminal, where plain Enter would submit the message.
-; Opens a ``` fence, pastes the clipboard, then closes the fence on a new
-; line. Only active when the active window title contains
-; "Visual Studio Code" or "NanoGPT".
+; Short single-line text (under 100 characters) becomes inline code: one
+; backtick either side, no line breaks, plus a trailing space after the closing
+; backtick so typing continues outside the code span. Everything else opens a ``` fence,
+; pastes the clipboard, then closes the fence on a new line. Only active when
+; the active window title contains "Visual Studio Code" or "NanoGPT".
 #If WinActive("Visual Studio Code") or WinActive("NanoGPT") or WinActive("OpenCode")
 ^+v::
 	; The backtick is AHK v1's escape character, so writing the fence literally
 	; ("```") sends only one backtick: the first two act as an escape pair and
 	; the third is a dangling escape. Neither {Raw} nor {Text} changes that.
-	; Building the fence with Chr(96) keeps it exact, three backticks long.
-	fenceMarker := Chr(96) Chr(96) Chr(96)
+	; Building the fence with Chr(96) keeps it exact.
+	singleBacktick := Chr(96)
+	inlineCodeFence := singleBacktick
+	blockCodeFence := singleBacktick singleBacktick singleBacktick
+
+	; Read the clipboard text first so the inline-versus-block decision is made
+	; before anything is sent. The clipboard is only read, never overwritten.
+	clipboardText := clipboard
+	StringLen, clipboardLength, clipboardText
+	isSingleLineText := (clipboardLength > 0) && !InStr(clipboardText, "`n") && !InStr(clipboardText, "`r")
+	; An empty read means the clipboard holds something that is not text (an
+	; image, say), so fall through to the block fence and just paste it.
+	useInlineCodeFence := isSingleLineText && (clipboardLength < 100)
+
+	if (useInlineCodeFence)
+	{
+		SendInput, %inlineCodeFence%
+		SendInput, ^v
+		Sleep, 200 ; give the target app time to finish pasting before closing the fence
+		SendInput, %inlineCodeFence%{Space} ; trailing space so the edit caret sits outside the inline code
+		Return
+	}
+
 	SendInput, +{Enter} ; newline without submitting in the opencode terminal
 	SendInput, +{Enter}
-	SendInput, %fenceMarker%
+	SendInput, %blockCodeFence%
 	SendInput, +{Enter}
 	Sleep, 40
 	SendInput, ^v
-	Sleep, 400 ; give the target app time to finish pasting before closing the fence
+	Sleep, 300 ; give the target app time to finish pasting before closing the fence
 	SendInput, +{Enter}
-	SendInput, %fenceMarker%
+	SendInput, %blockCodeFence%
 	SendInput, +{Enter}
 	Return
 #If
