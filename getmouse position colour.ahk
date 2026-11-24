@@ -1,3 +1,4 @@
+; This is an AutoHotkey v1 script (AutoHotkey v1.1 syntax, not v2)
 #NoEnv
 ;===Description========================================================================
 /*

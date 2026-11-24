@@ -1,3 +1,4 @@
+; This is an AutoHotkey v1 script (AutoHotkey v1.1 syntax, not v2)
 #NoEnv
 SendMode Input
 #InstallKeybdHook
@@ -62,7 +63,7 @@ Return
 ; Opens a ``` fence, pastes the clipboard, then closes the fence on a new
 ; line. Only active when the active window title contains
 ; "Visual Studio Code" or "NanoGPT".
-#If WinActive("Visual Studio Code") or WinActive("NanoGPT")
+#If WinActive("Visual Studio Code") or WinActive("NanoGPT") or WinActive("OpenCode")
 ^+v::
 	; The backtick is AHK v1's escape character, so writing the fence literally
 	; ("```") sends only one backtick: the first two act as an escape pair and
@@ -70,6 +71,7 @@ Return
 	; Building the fence with Chr(96) keeps it exact, three backticks long.
 	fenceMarker := Chr(96) Chr(96) Chr(96)
 	SendInput, +{Enter} ; newline without submitting in the opencode terminal
+	SendInput, +{Enter}
 	SendInput, %fenceMarker%
 	SendInput, +{Enter}
 	Sleep, 40
@@ -77,6 +79,7 @@ Return
 	Sleep, 400 ; give the target app time to finish pasting before closing the fence
 	SendInput, +{Enter}
 	SendInput, %fenceMarker%
+	SendInput, +{Enter}
 	Return
 #If
 
