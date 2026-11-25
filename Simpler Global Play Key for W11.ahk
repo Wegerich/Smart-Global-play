@@ -55,41 +55,37 @@ Return
 
 
 ; ####################################################################
-; ## CONTEXT: Visual Studio Code or NanoGPT - wrap clipboard in a
-; ## markdown code block (Ctrl+Shift+V)
+; ## CONTEXT: Visual Studio Code, NanoGPT or OpenCode - wrap clipboard in
+; ## a markdown code block (Ctrl+Shift+V)
 ; ####################################################################
-; Shift+Enter is used for the newlines (not plain Enter) so that this also
-; works in the opencode terminal, where plain Enter would submit the message.
-; Short single-line text (under 100 characters) becomes inline code: one
-; backtick either side, no line breaks, plus a trailing space after the closing
-; backtick so typing continues outside the code span. Everything else opens a ``` fence,
-; pastes the clipboard, then closes the fence on a new line. Only active when
-; the active window title contains "Visual Studio Code" or "NanoGPT".
+; Shift+Enter sends the newlines, so this also works in the opencode terminal
+; where plain Enter would submit the message.
+; Under 100 chars with no line breaks after trimming becomes inline code,
+; followed by a space; anything else becomes a ``` fence.
 #If WinActive("Visual Studio Code") or WinActive("NanoGPT") or WinActive("OpenCode")
 ^+v::
-	; The backtick is AHK v1's escape character, so writing the fence literally
-	; ("```") sends only one backtick: the first two act as an escape pair and
-	; the third is a dangling escape. Neither {Raw} nor {Text} changes that.
-	; Building the fence with Chr(96) keeps it exact.
+	; A literal backtick is v1's escape char, so build the fence with Chr(96).
 	singleBacktick := Chr(96)
 	inlineCodeFence := singleBacktick
 	blockCodeFence := singleBacktick singleBacktick singleBacktick
 
-	; Read the clipboard text first so the inline-versus-block decision is made
-	; before anything is sent. The clipboard is only read, never overwritten.
+	; Trim first, since copied text often ends with a line break. An empty read
+	; means the clipboard holds something that is not text, which uses the fence.
 	clipboardText := clipboard
-	StringLen, clipboardLength, clipboardText
-	isSingleLineText := (clipboardLength > 0) && !InStr(clipboardText, "`n") && !InStr(clipboardText, "`r")
-	; An empty read means the clipboard holds something that is not text (an
-	; image, say), so fall through to the block fence and just paste it.
+	trimmedClipboardText := RTrim(clipboardText, "`r`n`t ")
+	StringLen, clipboardLength, trimmedClipboardText
+	isSingleLineText := (clipboardLength > 0) && !InStr(trimmedClipboardText, "`n") && !InStr(trimmedClipboardText, "`r")
 	useInlineCodeFence := isSingleLineText && (clipboardLength < 100)
 
 	if (useInlineCodeFence)
 	{
+		; Paste the trimmed text so a trailing break is not put inside the backticks.
+		if (trimmedClipboardText != clipboardText)
+			clipboard := trimmedClipboardText
 		SendInput, %inlineCodeFence%
 		SendInput, ^v
-		Sleep, 200 ; give the target app time to finish pasting before closing the fence
-		SendInput, %inlineCodeFence%{Space} ; trailing space so the edit caret sits outside the inline code
+		Sleep, 200 ; let the paste finish
+		SendInput, %inlineCodeFence%{Space} ; caret ends outside the code span
 		Return
 	}
 
@@ -99,7 +95,7 @@ Return
 	SendInput, +{Enter}
 	Sleep, 40
 	SendInput, ^v
-	Sleep, 300 ; give the target app time to finish pasting before closing the fence
+	Sleep, 300 ; let the paste finish
 	SendInput, +{Enter}
 	SendInput, %blockCodeFence%
 	SendInput, +{Enter}
